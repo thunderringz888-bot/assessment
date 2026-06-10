@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aptitude Assessment</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --line:#262b36; --text:#e8eaf0;
+    --muted:#8a91a3; --accent:#7c5cff; --accent2:#9d85ff; --good:#3ddc97; --warn:#ff6b6b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--text); min-height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    display:flex; align-items:flex-start; justify-content:center; padding:24px 16px;
+  }
+  .wrap{width:100%; max-width:640px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:28px; margin-top:16px;}
+  h1{font-size:22px; margin-bottom:6px;}
+  h2{font-size:18px; margin-bottom:12px;}
+  p{line-height:1.55;}
+  .muted{color:var(--muted); font-size:14px; line-height:1.6;}
+  .topbar{display:flex; justify-content:space-between; align-items:center; padding:4px 2px;}
+  .timer{font-variant-numeric:tabular-nums; font-weight:700; font-size:18px; color:var(--accent2);}
+  .timer.low{color:var(--warn);}
+  .progress-track{height:6px; background:var(--line); border-radius:3px; margin-top:10px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--accent); width:0%; transition:width .25s;}
+  .chip{display:inline-block; font-size:12px; letter-spacing:.4px; text-transform:uppercase; color:var(--accent2);
+    border:1px solid var(--accent); border-radius:999px; padding:3px 10px; margin-bottom:14px;}
+  .qtext{font-size:18px; line-height:1.5; margin-bottom:18px; white-space:pre-wrap;}
+  .opt{
+    display:block; width:100%; text-align:left; background:#1d2230; border:1px solid var(--line);
+    color:var(--text); border-radius:12px; padding:14px 16px; font-size:16px; margin-bottom:10px; cursor:pointer;
+  }
+  .opt:hover{border-color:var(--accent2);}
+  .opt.selected{border-color:var(--accent); background:#241f3d;}
+  .opt .key{color:var(--muted); font-size:13px; margin-right:8px;}
+  .btn{
+    background:var(--accent); color:#fff; border:none; border-radius:12px; padding:13px 22px;
+    font-size:16px; font-weight:600; cursor:pointer; width:100%; margin-top:8px;
+  }
+  .btn:disabled{opacity:.35; cursor:not-allowed;}
+  .btn.secondary{background:#262b36;}
+  input[type=text], input[type=email]{
+    width:100%; background:#1d2230; border:1px solid var(--line); border-radius:10px;
+    color:var(--text); padding:12px 14px; font-size:15px; margin:6px 0 14px;
+  }
+  label{font-size:14px; color:var(--muted);}
+  ul.rules{margin:14px 0 18px 18px;}
+  ul.rules li{margin-bottom:8px; line-height:1.5; font-size:15px;}
+  .hidden{display:none;}
+  .code-box{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:28px; font-weight:700;
+    letter-spacing:2px; color:var(--good); background:#10231c; border:1px dashed var(--good);
+    border-radius:12px; padding:16px; text-align:center; margin:16px 0;
+  }
+  .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0;}
+  .stat{background:#1d2230; border:1px solid var(--line); border-radius:10px; padding:12px;}
+  .stat .v{font-size:20px; font-weight:700;}
+  .stat .k{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px;}
+  .ok{color:var(--good);} .bad{color:var(--warn);}
+  .decode-out{background:#1d2230; border:1px solid var(--line); border-radius:10px; padding:14px; margin-top:12px; font-size:15px; line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- START SCREEN -->
+  <div id="screen-start" class="card">
+    <h1>Aptitude Assessment</h1>
+    <p class="muted">Part of your application. 20 questions · 15 minutes · one attempt.</p>
+    <ul class="rules">
+      <li>Use a <b>desktop or laptop</b>, alone, in one sitting.</li>
+      <li>Questions are <b>forward-only</b> — you cannot go back. Answer carefully.</li>
+      <li>The timer auto-submits when it hits 0:00. Unanswered = wrong.</li>
+      <li><b>Switching tabs/windows is recorded</b> and shown on your result.</li>
+      <li>No calculator needed. Pen and paper are fine.</li>
+      <li>Enter your name <b>exactly as on your application</b> — your result code is bound to it.</li>
+    </ul>
+    <label>Full name (as on your application)</label>
+    <input id="in-name" type="text" autocomplete="name" placeholder="e.g. Maria Santos">
+    <label>Email</label>
+    <input id="in-email" type="email" autocomplete="email" placeholder="you@email.com">
+    <button class="btn" onclick="startTest()">Start the test</button>
+    <p class="muted" style="margin-top:12px;">By starting, you confirm you're completing this alone and without AI tools.</p>
+  </div>
+
+  <!-- TEST SCREEN -->
+  <div id="screen-test" class="card hidden">
+    <div class="topbar">
+      <span class="muted" id="q-progress">Question 1 of 20</span>
+      <span class="timer" id="timer">15:00</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="bar"></div></div>
+    <div style="margin-top:18px;">
+      <span class="chip" id="q-cat">Logic</span>
+      <div class="qtext" id="q-text"></div>
+      <div id="q-opts"></div>
+      <button class="btn" id="btn-next" disabled onclick="next()">Next →</button>
+      <p class="muted" style="margin-top:10px; text-align:center;">Keys: 1–4 to select · Enter to continue</p>
+    </div>
+  </div>
+
+  <!-- DONE SCREEN -->
+  <div id="screen-done" class="card hidden">
+    <h1>Test complete ✓</h1>
+    <p class="muted" id="done-reason"></p>
+    <div class="code-box" id="done-code">VA-XXXXX</div>
+    <div class="stat-grid">
+      <div class="stat"><div class="v" id="done-score">–</div><div class="k">Score</div></div>
+      <div class="stat"><div class="v" id="done-time">–</div><div class="k">Time used</div></div>
+      <div class="stat"><div class="v" id="done-name">–</div><div class="k">Name</div></div>
+      <div class="stat"><div class="v" id="done-tabs">–</div><div class="k">Tab switches</div></div>
+    </div>
+    <p><b>Next step:</b> screenshot this entire screen and send it together with your verification code in your application reply.</p>
+    <p class="muted" style="margin-top:10px;">Your answers are locked. You can close this page.</p>
+  </div>
+
+  <!-- DECODE SCREEN (admin: open page with #decode) -->
+  <div id="screen-decode" class="card hidden">
+    <h2>🔐 Code Verifier (internal)</h2>
+    <label>Verification code</label>
+    <input id="dec-code" type="text" placeholder="VA-XXXXX">
+    <label>Candidate name (exactly as they applied)</label>
+    <input id="dec-name" type="text" placeholder="Maria Santos">
+    <button class="btn" onclick="runDecode()">Decode</button>
+    <div class="decode-out hidden" id="dec-out"></div>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+const TEST_MINUTES = 15;
+
+// a = index of the correct option in `opts` (before shuffling)
+const QUESTIONS = [
+  {cat:"Logic", q:"What number comes next?\n3, 6, 12, 24, …", opts:["36","42","48","60"], a:2},
+  {cat:"Logic", q:"What number comes next?\n2, 3, 5, 8, 12, …", opts:["16","17","18","20"], a:1},
+  {cat:"Logic", q:"Which one does NOT belong?", opts:["Dog","Cat","Sparrow","Cow"], a:2},
+  {cat:"Logic", q:"Hand is to glove as foot is to …", opts:["Sock","Leg","Toe","Floor"], a:0},
+  {cat:"Logic", q:"All Bloops are Razzies. All Razzies are Lazzies.\nAre all Bloops definitely Lazzies?", opts:["Yes","No","Cannot be determined","Only some are"], a:0},
+  {cat:"Logic", q:"Mary's father has five daughters: Nana, Nene, Nini, Nono and …?", opts:["Nunu","Mary","Nana","Cannot be known"], a:1},
+  {cat:"Logic", q:"What number comes next?\n1, 1, 2, 3, 5, 8, …", opts:["11","12","13","15"], a:2},
+  {cat:"Logic", q:"What number comes next?\n81, 27, 9, 3, …", opts:["0","1","2","3"], a:1},
+  {cat:"Numerical", q:"A shirt costs $20 after a 20% discount.\nWhat was the original price?", opts:["$22","$24","$25","$28"], a:2},
+  {cat:"Numerical", q:"If 5 machines make 5 widgets in 5 minutes, how long do 100 machines take to make 100 widgets?", opts:["5 minutes","20 minutes","100 minutes","500 minutes"], a:0},
+  {cat:"Numerical", q:"What is 15% of 200?", opts:["15","25","30","35"], a:2},
+  {cat:"Numerical", q:"A train travels 60 km in 45 minutes.\nWhat is its speed in km/h?", opts:["70","75","80","90"], a:2},
+  {cat:"English", q:"Which word is spelled correctly?", opts:["Recieve","Receive","Receave","Riceive"], a:1},
+  {cat:"English", q:"\"Their going to the store tomorrow.\"\nWhat is wrong with this sentence?", opts:["\"Their\" should be \"They're\"","\"going\" should be \"gone\"","\"store\" should be \"shop\"","Nothing is wrong"], a:0},
+  {cat:"English", q:"Which word is closest in meaning to \"obtain\"?", opts:["Lose","Acquire","Borrow","Steal"], a:1},
+  {cat:"English", q:"\"If I ___ you, I would take the job.\"", opts:["was","were","am","be"], a:1},
+  {cat:"Detail", q:"Which option matches this EXACTLY?\nXK-2847-bQ", opts:["XK-2487-bQ","XK-2847-bq","XK-2847-bQ","XX-2847-bQ"], a:2},
+  {cat:"Detail", q:"How many times does the letter \"e\" appear (ignore upper/lower case)?\n\"Excellent experience exceeds expectations\"", opts:["10","11","12","13"], a:2},
+  {cat:"Detail", q:"Which is the exact reverse of 84591?", opts:["19548","19458","15948","19584"], a:0},
+  {cat:"Detail", q:"Select the SECOND-longest word:", opts:["cat","elephant","butterfly","dog"], a:1}
+];
+
+let runtime=[], answers=[], cur=0, tabSwitches=0, deadline=0, timerId=null, testActive=false;
+let candName="", candEmail="";
+const $ = id => document.getElementById(id);
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+
+// ---- verification code ----
+function nameSum(n){
+  n=(n||"").trim().toLowerCase().replace(/\s+/g," ");
+  let s=0; for(const c of n) s+=c.codePointAt(0);
+  return s%97;
+}
+function makeCode(score,secs,name,tabs){
+  const raw=(((score*7919)+Math.min(secs,7918))*97+nameSum(name))*8+Math.min(tabs,7);
+  return "VA-"+raw.toString(36).toUpperCase();
+}
+function decodeCode(code,name){
+  const cleaned=(code||"").trim().toUpperCase().replace(/^VA-?/,"");
+  if(!/^[0-9A-Z]+$/.test(cleaned)) return null;
+  const raw=parseInt(cleaned,36);
+  if(!isFinite(raw)||raw<0) return null;
+  const tabs=raw%8; let r=Math.floor(raw/8);
+  const sum=r%97; r=Math.floor(r/97);
+  const secs=r%7919; const score=Math.floor(r/7919);
+  if(score>QUESTIONS.length||secs>TEST_MINUTES*60) return null;
+  return {score,secs,tabs,nameMatch:name?nameSum(name)===sum:null};
+}
+
+// ---- flow ----
+function startTest(){
+  candName=$("in-name").value.trim();
+  candEmail=$("in-email").value.trim();
+  if(candName.length<3){ alert("Enter your full name exactly as on your application."); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candEmail)){ alert("Enter a valid email."); return; }
+
+  runtime=shuffle(QUESTIONS.map(src=>{
+    const order=shuffle([0,1,2,3]);
+    return {cat:src.cat, q:src.q, opts:order.map(i=>src.opts[i]), a:order.indexOf(src.a)};
+  }));
+  answers=new Array(runtime.length).fill(-1);
+  cur=0; tabSwitches=0; testActive=true;
+  deadline=Date.now()+TEST_MINUTES*60*1000;
+  timerId=setInterval(tick,250);
+
+  $("screen-start").classList.add("hidden");
+  $("screen-test").classList.remove("hidden");
+  render();
+}
+
+function render(){
+  const q=runtime[cur];
+  $("q-progress").textContent="Question "+(cur+1)+" of "+runtime.length;
+  $("bar").style.width=(cur/runtime.length*100)+"%";
+  $("q-cat").textContent=q.cat;
+  $("q-text").textContent=q.q;
+  const box=$("q-opts"); box.innerHTML="";
+  q.opts.forEach((opt,i)=>{
+    const b=document.createElement("button");
+    b.className="opt"+(answers[cur]===i?" selected":"");
+    b.innerHTML='<span class="key">'+(i+1)+'</span>'+opt.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+    b.onclick=()=>selectOpt(i);
+    box.appendChild(b);
+  });
+  $("btn-next").disabled=answers[cur]===-1;
+  $("btn-next").textContent=(cur===runtime.length-1)?"Finish ✓":"Next →";
+}
+
+function selectOpt(i){
+  if(!testActive) return;
+  answers[cur]=i;
+  render();
+}
+
+function next(){
+  if(!testActive||answers[cur]===-1) return;
+  if(cur===runtime.length-1){ finish("completed"); }
+  else{ cur++; render(); }
+}
+
+function tick(){
+  const rem=Math.max(0,deadline-Date.now());
+  const s=Math.ceil(rem/1000);
+  const el=$("timer");
+  el.textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+  el.classList.toggle("low",s<=120);
+  if(rem<=0) finish("time");
+}
+
+function fmtSecs(s){ return Math.floor(s/60)+"m "+String(s%60).padStart(2,"0")+"s"; }
+
+function finish(reason){
+  if(!testActive) return;
+  testActive=false;
+  clearInterval(timerId);
+  const score=runtime.reduce((acc,q,i)=>acc+(answers[i]===q.a?1:0),0);
+  const secsUsed=Math.min(TEST_MINUTES*60, Math.max(0, TEST_MINUTES*60-Math.round((deadline-Date.now())/1000)));
+  const code=makeCode(score,secsUsed,candName,tabSwitches);
+
+  $("done-reason").textContent=(reason==="time")
+    ? "Time expired — the test auto-submitted."
+    : "Submitted. Thank you, "+candName.split(" ")[0]+".";
+  $("done-code").textContent=code;
+  $("done-score").textContent=score+" / "+runtime.length;
+  $("done-time").textContent=fmtSecs(secsUsed);
+  $("done-name").textContent=candName;
+  $("done-name").style.fontSize="14px";
+  $("done-tabs").textContent=tabSwitches;
+  $("done-tabs").className="v "+(tabSwitches<=1?"ok":"bad");
+
+  $("screen-test").classList.add("hidden");
+  $("screen-done").classList.remove("hidden");
+}
+
+// ---- guards ----
+document.addEventListener("visibilitychange",()=>{ if(document.hidden&&testActive) tabSwitches++; });
+window.addEventListener("beforeunload",e=>{ if(testActive){ e.preventDefault(); e.returnValue=""; } });
+document.addEventListener("keydown",e=>{
+  if(!testActive) return;
+  if(e.key>="1"&&e.key<="4") selectOpt(parseInt(e.key,10)-1);
+  if(e.key==="Enter") next();
+});
+
+// ---- admin decode panel ----
+function maybeShowDecode(){
+  if(location.hash==="#decode"){
+    $("screen-start").classList.add("hidden");
+    $("screen-test").classList.add("hidden");
+    $("screen-done").classList.add("hidden");
+    $("screen-decode").classList.remove("hidden");
+  }
+}
+function runDecode(){
+  const out=$("dec-out");
+  const r=decodeCode($("dec-code").value, $("dec-name").value);
+  out.classList.remove("hidden");
+  if(!r){ out.innerHTML='<span class="bad">✗ Invalid code — likely typo or fabricated.</span>'; return; }
+  const nameLine=(r.nameMatch===null)?"(no name entered)":(r.nameMatch?'<span class="ok">✓ matches</span>':'<span class="bad">✗ DOES NOT MATCH — code may be borrowed from another candidate</span>');
+  out.innerHTML=
+    "<b>Score:</b> "+r.score+" / "+QUESTIONS.length+"<br>"+
+    "<b>Time used:</b> "+fmtSecs(r.secs)+"<br>"+
+    "<b>Tab switches:</b> "+(r.tabs>=7?"7+":r.tabs)+"<br>"+
+    "<b>Name binding:</b> "+nameLine;
+}
+window.addEventListener("hashchange",maybeShowDecode);
+maybeShowDecode();
+</script>
+</body>
+</html>
