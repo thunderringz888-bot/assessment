@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stage 2 Application — Verification</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --line:#262b36; --text:#e8eaf0;
+    --muted:#8a91a3; --accent:#7c5cff; --accent2:#9d85ff; --warn:#ff6b6b; --good:#3ddc97;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    display:flex; justify-content:center; padding:24px 16px 64px;
+  }
+  .wrap{width:100%; max-width:680px;}
+  h1{font-size:22px; margin:18px 0 6px;}
+  h2{font-size:20px; margin-bottom:8px;}
+  p{line-height:1.55;}
+  .muted{color:var(--muted); font-size:14px; line-height:1.6;}
+  .notice{
+    background:#241f3d; border:1px solid var(--accent); border-radius:12px;
+    padding:14px 16px; margin:16px 0; font-size:14px; line-height:1.6;
+  }
+  .notice.red{background:#2d1820; border-color:var(--warn);}
+  fieldset{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:22px; margin-top:18px;
+  }
+  legend{
+    font-weight:700; font-size:15px; padding:4px 12px; background:var(--accent);
+    border-radius:999px; color:#fff;
+  }
+  label{display:block; font-size:14px; color:var(--muted); margin:14px 0 4px;}
+  label b{color:var(--text);}
+  .req::after{content:" *"; color:var(--warn);}
+  input[type=text], input[type=email], input[type=tel], input[type=url],
+  input[type=date], input[type=number], select, textarea{
+    width:100%; background:#1d2230; border:1px solid var(--line); border-radius:10px;
+    color:var(--text); padding:11px 13px; font-size:15px; font-family:inherit;
+  }
+  textarea{min-height:110px; resize:vertical;}
+  input[type=file]{width:100%; color:var(--muted); font-size:14px; padding:8px 0;}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:540px){ .row{grid-template-columns:1fr;} }
+  .check{display:flex; gap:10px; align-items:flex-start; margin:12px 0; font-size:14px; line-height:1.5;}
+  .check input{margin-top:3px; accent-color:var(--accent); width:16px; height:16px; flex-shrink:0;}
+  .btn{
+    background:var(--accent); color:#fff; border:none; border-radius:12px; padding:14px 22px;
+    font-size:16px; font-weight:600; cursor:pointer; width:100%; margin-top:22px;
+  }
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .hint{font-size:12px; color:var(--muted); margin-top:4px;}
+  a{color:var(--accent2);}
+  .hp{position:absolute; left:-5000px;}
+  .hidden{display:none;}
+  .done-card{background:var(--card); border:1px solid var(--good); border-radius:16px; padding:28px; margin-top:18px;}
+  .err-card{background:var(--card); border:1px solid var(--warn); border-radius:16px; padding:28px; margin-top:18px;}
+  #progress{margin-top:12px; font-size:14px; color:var(--accent2); text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="form-section">
+    <h1>Stage 2 Application — Identity & Setup Verification</h1>
+    <p class="muted">You're here because you passed the aptitude test — congrats. This step verifies who you are and that your setup can handle the job. It takes ~10 minutes. Photos are compressed automatically in your browser before sending.</p>
+
+    <div class="notice">
+      <b>What this job is (so there are no surprises):</b> paid chat work for an online creator brand — friendly, playful, <b>flirty companion-style conversation with an 18+ audience</b> on Discord. You must be 18+ and fully comfortable with this before continuing.
+    </div>
+    <div class="notice red">
+      <b>Anti-scam notice:</b> we will <b>never</b> contact you on Telegram, never ask for money, deposits, or "equipment fees", and never ask for banking passwords or OTPs. ID verification below is one-way (you → us) and used for hiring only.
+    </div>
+
+    <form id="kyc-form" novalidate>
+      <p class="hp"><label>Leave this empty: <input name="company_website" tabindex="-1" autocomplete="off"></label></p>
+
+      <fieldset>
+        <legend>1 · Identity</legend>
+        <label class="req">Full legal name (must match your ID)</label>
+        <input type="text" name="full_name" required>
+        <div class="row">
+          <div>
+            <label>Preferred name / nickname</label>
+            <input type="text" name="preferred_name">
+          </div>
+          <div>
+            <label class="req">Date of birth</label>
+            <input type="date" name="dob" id="dob" required>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="req">Email</label>
+            <input type="email" name="email" required>
+          </div>
+          <div>
+            <label class="req">Phone (WhatsApp-enabled — we don't use Telegram)</label>
+            <input type="tel" name="phone_whatsapp" required placeholder="+63 9XX XXX XXXX">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="req">Discord username</label>
+            <input type="text" name="discord_username" required placeholder="username">
+          </div>
+          <div>
+            <label class="req">Country & city</label>
+            <input type="text" name="location" required placeholder="Philippines, Cebu">
+          </div>
+        </div>
+        <label class="req">Your timezone</label>
+        <select name="timezone" required>
+          <option value="">Select…</option>
+          <option>GMT+8 (Philippines)</option>
+          <option>GMT+7</option>
+          <option>GMT+5:30 (India)</option>
+          <option>GMT+0 to +3</option>
+          <option>Americas (GMT-4 to -8)</option>
+          <option>Other (mention in experience section)</option>
+        </select>
+        <label>OnlineJobs.ph profile link</label>
+        <input type="url" name="olj_profile" placeholder="https://www.onlinejobs.ph/jobseekers/info/...">
+      </fieldset>
+
+      <fieldset>
+        <legend>2 · ID Verification (KYC)</legend>
+        <p class="muted">Used only to confirm you're a real person and 18+. Cover/blur the ID number if you wish — we need your name, photo, and birthdate visible. JPG/PNG photos preferred.</p>
+        <label class="req">ID type</label>
+        <select name="id_type" required>
+          <option value="">Select…</option>
+          <option>Passport</option>
+          <option>PhilSys National ID</option>
+          <option>UMID</option>
+          <option>Driver's License</option>
+          <option>Other government ID</option>
+        </select>
+        <label class="req">Photo of your ID (front)</label>
+        <input type="file" name="id_upload" id="id_upload" accept="image/*" required>
+        <label class="req">Selfie holding the same ID</label>
+        <input type="file" name="selfie_id_upload" id="selfie_id_upload" accept="image/*" required>
+      </fieldset>
+
+      <fieldset>
+        <legend>3 · Tech Setup</legend>
+        <div class="row">
+          <div>
+            <label class="req">Computer (model / CPU)</label>
+            <input type="text" name="device" required placeholder="e.g. Lenovo ThinkPad, Ryzen 5">
+          </div>
+          <div>
+            <label class="req">RAM</label>
+            <select name="ram" required>
+              <option value="">Select…</option>
+              <option>4 GB</option>
+              <option>8 GB</option>
+              <option>16 GB</option>
+              <option>32 GB+</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="req">Download speed (Mbps)</label>
+            <input type="number" name="down_mbps" min="1" max="10000" required>
+          </div>
+          <div>
+            <label class="req">Upload speed (Mbps)</label>
+            <input type="number" name="up_mbps" min="1" max="10000" required>
+          </div>
+        </div>
+        <label class="req">Screenshot of <a href="https://www.speedtest.net" target="_blank" rel="noopener">speedtest.net</a> result</label>
+        <input type="file" name="speedtest_upload" id="speedtest_upload" accept="image/*" required>
+        <label class="req">Backup plan for power/internet outages</label>
+        <textarea name="backup_plan" required placeholder="e.g. mobile data + powerbank, nearby cafe, generator…"></textarea>
+        <div class="row">
+          <div>
+            <label class="req">Typing speed — WPM from a 1-min test at <a href="https://www.typingtest.com" target="_blank" rel="noopener">typingtest.com</a></label>
+            <input type="number" name="typing_wpm" min="10" max="200" required>
+          </div>
+          <div>
+            <label class="req">Do you have a working headset/mic?</label>
+            <select name="headset" required>
+              <option value="">Select…</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>4 · Experience & English</legend>
+        <label class="req">Experience with chatting / VA / sales / customer support</label>
+        <select name="experience_years" required>
+          <option value="">Select…</option>
+          <option>None — first job</option>
+          <option>Under 1 year</option>
+          <option>1–3 years</option>
+          <option>3+ years</option>
+        </select>
+        <label>Briefly: where did you work and what did you do?</label>
+        <textarea name="experience_details" maxlength="900" placeholder="Agency names optional — role + what you actually did matters more."></textarea>
+        <label class="req">Honest English self-rating</label>
+        <select name="english_level" required>
+          <option value="">Select…</option>
+          <option>B1 — I manage, with mistakes</option>
+          <option>B2 — comfortable in most conversations</option>
+          <option>C1 — fluent and natural</option>
+          <option>C2 — native-level</option>
+        </select>
+        <label class="req">Writing sample — a community member you've chatted with a few times says: <b>"idk, feels weird buying a gift for someone online lol"</b>. Reply in 4–6 sentences (200–1500 characters). Be warm, playful, and persuasive — without being pushy.</label>
+        <textarea name="writing_sample" minlength="200" maxlength="1500" required placeholder="Write exactly what you would send…"></textarea>
+        <p class="hint">This is the most important question on this form. Write it yourself — AI-written answers are easy to spot and are an instant reject.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>5 · Availability & Pay</legend>
+        <div class="row">
+          <div>
+            <label class="req">Hours available per week</label>
+            <select name="hours_week" required>
+              <option value="">Select…</option>
+              <option>10–20</option>
+              <option>20–30</option>
+              <option>30–40</option>
+              <option>40+</option>
+            </select>
+          </div>
+          <div>
+            <label class="req">Can you work EST evening/night shift?</label>
+            <select name="shift_pref" required>
+              <option value="">Select…</option>
+              <option>Yes — preferred</option>
+              <option>Yes — possible</option>
+              <option>No</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="req">Earliest start date</label>
+            <input type="date" name="start_date" required>
+          </div>
+          <div>
+            <label class="req">Payment method</label>
+            <select name="pay_method" required>
+              <option value="">Select…</option>
+              <option>GCash</option>
+              <option>Maya</option>
+              <option>Wise</option>
+              <option>PayPal</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <label class="check" style="margin-top:18px;"><input type="checkbox" name="comp_ack" value="yes" required> I understand and accept the pay model: <b>$1.00/hr base + 5% commission</b> on revenue I generate (uncapped), paid bi-weekly.</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>6 · Agreements</legend>
+        <label class="check"><input type="checkbox" name="agree_18" value="yes" required> I confirm I am 18 years of age or older.</label>
+        <label class="check"><input type="checkbox" name="agree_truth" value="yes" required> All information and documents in this application are true and mine.</label>
+        <label class="check"><input type="checkbox" name="agree_content" value="yes" required> I am comfortable doing flirty, companion-style chat work for an 18+ audience.</label>
+        <label class="check"><input type="checkbox" name="agree_no_telegram" value="yes" required> I understand all work communication happens on Discord/WhatsApp/email — never Telegram — and anyone contacting me on Telegram about this job is an impersonator.</label>
+        <label class="check"><input type="checkbox" name="agree_confidential" value="yes" required> I will keep scripts, documents, tools, and account details confidential, during and after this role.</label>
+        <label class="check"><input type="checkbox" name="agree_monitoring" value="yes" required> I consent to occasional screen-share check-ins during paid shifts.</label>
+        <label class="check"><input type="checkbox" name="agree_privacy" value="yes" required> I consent to my data being used for this hiring process only.</label>
+      </fieldset>
+
+      <button class="btn" type="submit" id="submit-btn">Submit application</button>
+      <div id="progress" class="hidden"></div>
+      <p class="hint" style="text-align:center; margin-top:10px;">We review within 48 hours and reply by email with your interview slot.</p>
+    </form>
+  </div>
+
+  <div id="done-section" class="done-card hidden">
+    <h2>Application received ✓</h2>
+    <p>Thanks — we got everything, including your verification photos. We review within 48 hours and reply <b>by email</b> with your interview slot.</p>
+    <p class="muted" style="margin-top:10px;">Reminder: we never contact applicants on Telegram. You can close this page.</p>
+  </div>
+
+  <div id="error-section" class="err-card hidden">
+    <h2>Something went wrong</h2>
+    <p id="error-msg">Your application couldn't be sent.</p>
+    <p class="muted" style="margin-top:10px;">Please try again in a minute. If it keeps failing, email your answers and photos to <b>[REPLACE: contact email]</b> with subject "Stage 2 Application".</p>
+  </div>
+</div>
+
+<script>
+"use strict";
+// Webhook endpoint, lightly obfuscated (base64 of reversed URL) so public-repo
+// scrapers grepping for raw webhook strings don't pick it up. Regenerate the
+// webhook + re-encode here if it ever gets spammed.
+const HOOK_B64 = "REPLACE_WEBHOOK_B64";
+function hookUrl(){
+  try{
+    if(HOOK_B64.indexOf("REPLACE")===0) return null;
+    return atob(HOOK_B64).split("").reverse().join("");
+  }catch(e){ return null; }
+}
+
+const loadedAt = Date.now();
+const form = document.getElementById("kyc-form");
+const $ = id => document.getElementById(id);
+
+function slug(s){ return (s||"applicant").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40); }
+
+function age(dobStr){
+  const d = new Date(dobStr), now = new Date();
+  let a = now.getFullYear()-d.getFullYear();
+  const m = now.getMonth()-d.getMonth();
+  if(m<0||(m===0&&now.getDate()<d.getDate())) a--;
+  return a;
+}
+
+// Downscale to <=1600px long edge, JPEG q0.8. Falls back to the original file
+// if the browser can't decode it (e.g. HEIC outside Safari) and it's <=7MB.
+async function compressImage(file){
+  const LIMIT = 7*1024*1024;
+  if(!file) return null;
+  try{
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, 1600/Math.max(bmp.width,bmp.height));
+    const w = Math.max(1,Math.round(bmp.width*scale)), h = Math.max(1,Math.round(bmp.height*scale));
+    const c = document.createElement("canvas"); c.width=w; c.height=h;
+    c.getContext("2d").drawImage(bmp,0,0,w,h);
+    const blob = await new Promise(r=>c.toBlob(r,"image/jpeg",0.8));
+    if(blob && blob.size>0) return blob.size < file.size ? blob : file;
+  }catch(e){ /* fall through */ }
+  return file.size<=LIMIT ? file : null;
+}
+
+function fieldVal(name){
+  const el = form.elements[name];
+  if(!el) return "";
+  if(el.type==="checkbox") return el.checked ? "yes" : "no";
+  return (el.value||"").trim();
+}
+
+form.addEventListener("submit", async function(e){
+  e.preventDefault();
+
+  // native validation
+  if(!form.checkValidity()){ form.reportValidity(); return; }
+  // spam gates
+  if(fieldVal("company_website")!=="") return; // honeypot
+  if(Date.now()-loadedAt < 15000){ alert("Please take a moment to review your answers before submitting."); return; }
+  // age
+  if(age(fieldVal("dob")) < 18){ alert("You must be 18 or older to apply for this role."); return; }
+
+  const hook = hookUrl();
+  if(!hook){ alert("This form isn't accepting submissions yet. Please email us instead."); return; }
+
+  const btn = $("submit-btn"), prog = $("progress");
+  btn.disabled = true; prog.classList.remove("hidden");
+  prog.textContent = "Compressing photos…";
+
+  const nameSlug = slug(fieldVal("full_name"));
+  const idImg = await compressImage($("id_upload").files[0]);
+  const selfieImg = await compressImage($("selfie_id_upload").files[0]);
+  const speedImg = await compressImage($("speedtest_upload").files[0]);
+  if(!idImg || !selfieImg || !speedImg){
+    btn.disabled = false; prog.classList.add("hidden");
+    alert("One of your photos couldn't be processed. Please use JPG or PNG files under 7 MB.");
+    return;
+  }
+
+  const F = fieldVal;
+  const textDump =
+`NEW VA APPLICATION — ${F("full_name")}
+==================================================
+IDENTITY
+  Full name:      ${F("full_name")}
+  Preferred:      ${F("preferred_name")}
+  DOB:            ${F("dob")} (age ${age(F("dob"))})
+  Email:          ${F("email")}
+  WhatsApp:       ${F("phone_whatsapp")}
+  Discord:        ${F("discord_username")}
+  Location:       ${F("location")}
+  Timezone:       ${F("timezone")}
+  OLJ profile:    ${F("olj_profile")}
+KYC
+  ID type:        ${F("id_type")}  (photos attached)
+TECH
+  Device:         ${F("device")} | RAM: ${F("ram")}
+  Speed:          ${F("down_mbps")} down / ${F("up_mbps")} up Mbps (screenshot attached)
+  Backup plan:    ${F("backup_plan")}
+  Typing WPM:     ${F("typing_wpm")} | Headset: ${F("headset")}
+EXPERIENCE
+  Years:          ${F("experience_years")}
+  English:        ${F("english_level")}
+  Details:        ${F("experience_details")}
+WRITING SAMPLE
+${F("writing_sample")}
+AVAILABILITY & PAY
+  Hours/week:     ${F("hours_week")}
+  EST night ok:   ${F("shift_pref")}
+  Start date:     ${F("start_date")}
+  Pay method:     ${F("pay_method")}
+  Pay model ack:  ${F("comp_ack")}
+AGREEMENTS
+  18+: ${F("agree_18")} | truthful: ${F("agree_truth")} | content-ok: ${F("agree_content")} | no-telegram: ${F("agree_no_telegram")} | confidential: ${F("agree_confidential")} | monitoring: ${F("agree_monitoring")} | privacy: ${F("agree_privacy")}
+`;
+
+  const embed = {
+    title: "📥 New VA Application — " + F("full_name"),
+    color: 0x7c5cff,
+    description: "**Writing sample:**\n" + F("writing_sample").slice(0,1000),
+    fields: [
+      {name:"Email", value:F("email")||"—", inline:true},
+      {name:"WhatsApp", value:F("phone_whatsapp")||"—", inline:true},
+      {name:"Discord", value:F("discord_username")||"—", inline:true},
+      {name:"Age / Location", value:age(F("dob"))+" / "+(F("location")||"—"), inline:true},
+      {name:"English", value:F("english_level").split(" — ")[0]||"—", inline:true},
+      {name:"WPM / Speed", value:F("typing_wpm")+" wpm / "+F("down_mbps")+"↓ "+F("up_mbps")+"↑", inline:true},
+      {name:"Experience", value:F("experience_years")||"—", inline:true},
+      {name:"Hours & shift", value:F("hours_week")+" hrs, EST: "+F("shift_pref"), inline:true},
+      {name:"Start / Pay via", value:F("start_date")+" / "+F("pay_method"), inline:true}
+    ],
+    footer: {text:"Full record + ID photos attached • check name vs ID before interview"}
+  };
+
+  const fd = new FormData();
+  fd.append("payload_json", JSON.stringify({
+    username: "VA Applications",
+    embeds: [embed],
+    allowed_mentions: {parse: []}
+  }));
+  fd.append("files[0]", idImg, nameSlug+"-id.jpg");
+  fd.append("files[1]", selfieImg, nameSlug+"-selfie.jpg");
+  fd.append("files[2]", speedImg, nameSlug+"-speedtest.jpg");
+  fd.append("files[3]", new Blob([textDump],{type:"text/plain"}), nameSlug+"-application.txt");
+
+  prog.textContent = "Sending application…";
+  try{
+    const res = await fetch(hook+"?wait=true", {method:"POST", body:fd});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    $("form-section").classList.add("hidden");
+    $("done-section").classList.remove("hidden");
+    window.scrollTo(0,0);
+  }catch(err){
+    btn.disabled = false; prog.classList.add("hidden");
+    $("error-section").classList.remove("hidden");
+    $("error-msg").textContent = "Your application couldn't be sent ("+err.message+").";
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+});
+</script>
+</body>
+</html>
