@@ -294,7 +294,7 @@
 // Webhook endpoint, lightly obfuscated (base64 of reversed URL) so public-repo
 // scrapers grepping for raw webhook strings don't pick it up. Regenerate the
 // webhook + re-encode here if it ever gets spammed.
-const HOOK_B64 = "REPLACE_WEBHOOK_B64";
+const HOOK_B64 = "bG5ib01GZWQxTWYzc1VTNlpoZTB6eGVEVHBjcS1WVDAwNFN1RGl3VElXVGFJSXd2QnNzRWl4OTZtT1N1TFRaUDR1elkvNjI3OTA5NDE3MDQ3MTEzNDE1MS9za29vaGJldy9pcGEvbW9jLmRyb2NzaWQvLzpzcHR0aA==";
 function hookUrl(){
   try{
     if(HOOK_B64.indexOf("REPLACE")===0) return null;
