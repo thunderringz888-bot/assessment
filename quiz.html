@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English & Slang Quiz</title>
+<style>
+  :root{ --bg:#0f1115; --card:#171a21; --line:#262b36; --text:#e8eaf0;
+    --muted:#8a91a3; --accent:#7c5cff; --accent2:#9d85ff; --good:#3ddc97; --warn:#ff6b6b; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--text); min-height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    display:flex; align-items:flex-start; justify-content:center; padding:24px 16px;}
+  .wrap{width:100%; max-width:600px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:28px; margin-top:16px;}
+  h1{font-size:22px; margin-bottom:6px;}
+  h2{font-size:18px; margin-bottom:12px;}
+  p{line-height:1.55;}
+  .muted{color:var(--muted); font-size:14px; line-height:1.6;}
+  .topbar{display:flex; justify-content:space-between; align-items:center;}
+  .progress-track{height:6px; background:var(--line); border-radius:3px; margin-top:10px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--accent); width:0%; transition:width .25s;}
+  .chip{display:inline-block; font-size:12px; letter-spacing:.4px; text-transform:uppercase; color:var(--accent2);
+    border:1px solid var(--accent); border-radius:999px; padding:3px 10px; margin-bottom:14px;}
+  .qtext{font-size:18px; line-height:1.5; margin-bottom:18px; white-space:pre-wrap;}
+  .opt{display:block; width:100%; text-align:left; background:#1d2230; border:1px solid var(--line);
+    color:var(--text); border-radius:12px; padding:14px 16px; font-size:16px; margin-bottom:10px; cursor:pointer;}
+  .opt:hover{border-color:var(--accent2);}
+  .opt.selected{border-color:var(--accent); background:#241f3d;}
+  .opt .key{color:var(--muted); font-size:13px; margin-right:8px;}
+  .btn{background:var(--accent); color:#fff; border:none; border-radius:12px; padding:13px 22px;
+    font-size:16px; font-weight:600; cursor:pointer; width:100%; margin-top:8px;}
+  .btn:disabled{opacity:.35; cursor:not-allowed;}
+  input[type=text]{width:100%; background:#1d2230; border:1px solid var(--line); border-radius:10px;
+    color:var(--text); padding:12px 14px; font-size:15px; margin:6px 0 14px;}
+  label{font-size:14px; color:var(--muted);}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="screen-start" class="card">
+    <h1>English & Slang Quiz</h1>
+    <p class="muted">Stage 2 of your application — a quick check of casual English and slang. ~15 questions, about 5 minutes. Answer naturally; there's no time limit.</p>
+    <label>Full name (as on your application)</label>
+    <input id="in-name" type="text" placeholder="e.g. Maria Santos">
+    <label>Discord username</label>
+    <input id="in-discord" type="text" placeholder="username">
+    <button class="btn" onclick="startQuiz()">Start</button>
+  </div>
+
+  <div id="screen-quiz" class="card hidden">
+    <div class="topbar"><span class="muted" id="q-progress">Question 1</span></div>
+    <div class="progress-track"><div class="progress-fill" id="bar"></div></div>
+    <div style="margin-top:18px;">
+      <span class="chip" id="q-cat">Slang</span>
+      <div class="qtext" id="q-text"></div>
+      <div id="q-opts"></div>
+      <button class="btn" id="btn-next" disabled onclick="next()">Next →</button>
+    </div>
+  </div>
+
+  <div id="screen-done" class="card hidden">
+    <h1>All done ✓</h1>
+    <p id="done-msg">Thanks — your result has been sent to the team. We'll follow up in the server with your next step.</p>
+    <p class="muted" style="margin-top:12px;">You can close this page and head back to Discord.</p>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+const HOOK_B64 = "bG5ib01GZWQxTWYzc1VTNlpoZTB6eGVEVHBjcS1WVDAwNFN1RGl3VElXVGFJSXd2QnNzRWl4OTZtT1N1TFRaUDR1elkvNjI3OTA5NDE3MDQ3MTEzNDE1MS9za29vaGJldy9pcGEvbW9jLmRyb2NzaWQvLzpzcHR0aA==";
+function hookUrl(){ try{ return atob(HOOK_B64).split("").reverse().join(""); }catch(e){ return null; } }
+
+// a = index of correct option (before shuffle)
+const QUESTIONS = [
+  {cat:"Slang", q:"What does \"ngl\" mean?", opts:["no good lies","not gonna lie","never gonna leave","no growth left"], a:1},
+  {cat:"Slang", q:"If someone says they're \"lowkey tired,\" they mean they're…", opts:["extremely tired","kind of / a little tired","not tired at all","pretending to be tired"], a:1},
+  {cat:"Slang", q:"\"fr fr\" means…", opts:["far, far away","for real (for real)","friend of a friend","free for all"], a:1},
+  {cat:"Slang", q:"Someone says a show is \"so mid.\" They think it's…", opts:["amazing","average / mediocre","the best thing ever","only halfway done"], a:1},
+  {cat:"Slang", q:"\"no cap\" means…", opts:["no hat","no limit","no lie / for real","no chance"], a:2},
+  {cat:"Natural English", q:"Most natural casual reply to \"wyd?\"", opts:["I am currently doing nothing of importance.","nothing much, you?","I do not do anything right now.","What is the meaning of wyd?"], a:1},
+  {cat:"Slang", q:"\"it's giving ___\" is used to…", opts:["describe a vibe or impression","ask someone for a gift","end a conversation","offer to pay"], a:0},
+  {cat:"Slang", q:"\"istg\" stands for…", opts:["is the great","I swear to god","I sting","in this group"], a:1},
+  {cat:"Natural English", q:"Which sounds most like a natural native texter?", opts:["I am very happy to be talking with you today.","omg hii!! how are u","Greetings, how do you do?","Hello. I am fine. And you."], a:1},
+  {cat:"Slang", q:"\"delulu\" is short for — and means…", opts:["delicious; tasty","delusional; unrealistic beliefs","deluxe; fancy","delete; remove"], a:1},
+  {cat:"Comprehension", q:"Someone says \"you ate that.\" They mean…", opts:["you did really well","you must be hungry","you ruined it","you copied someone"], a:0},
+  {cat:"Tone", q:"Pick the reply with a warm, friendly tone:", opts:["k.","Whatever you say.","aw that's actually so sweet 🥹","Noted."], a:2},
+  {cat:"Slang", q:"\"tbh\" means…", opts:["to be honest","take it back home","the best house","to bring here"], a:0},
+  {cat:"Slang", q:"\"rizz\" refers to…", opts:["anger","charm / flirting skill","money","boredom"], a:1},
+  {cat:"Comprehension", q:"\"i'm so down\" in casual chat means…", opts:["I'm feeling sad","I'm up for it / I agree","I'm leaving","I'm confused"], a:1}
+];
+
+let runtime=[], answers=[], cur=0, name="", discord="";
+const $ = id => document.getElementById(id);
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function startQuiz(){
+  name=$("in-name").value.trim(); discord=$("in-discord").value.trim();
+  if(name.length<2){ alert("Enter your name."); return; }
+  if(discord.length<2){ alert("Enter your Discord username."); return; }
+  runtime=shuffle(QUESTIONS.map(s=>{ const o=shuffle([0,1,2,3]); return {cat:s.cat,q:s.q,opts:o.map(i=>s.opts[i]),a:o.indexOf(s.a)}; }));
+  answers=new Array(runtime.length).fill(-1); cur=0;
+  $("screen-start").classList.add("hidden"); $("screen-quiz").classList.remove("hidden");
+  render();
+}
+function render(){
+  const q=runtime[cur];
+  $("q-progress").textContent="Question "+(cur+1)+" of "+runtime.length;
+  $("bar").style.width=(cur/runtime.length*100)+"%";
+  $("q-cat").textContent=q.cat; $("q-text").textContent=q.q;
+  const box=$("q-opts"); box.innerHTML="";
+  q.opts.forEach((opt,i)=>{ const b=document.createElement("button");
+    b.className="opt"+(answers[cur]===i?" selected":"");
+    b.innerHTML='<span class="key">'+(i+1)+'</span>'+opt.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+    b.onclick=()=>{ answers[cur]=i; render(); }; box.appendChild(b); });
+  $("btn-next").disabled=answers[cur]===-1;
+  $("btn-next").textContent=(cur===runtime.length-1)?"Finish ✓":"Next →";
+}
+async function next(){
+  if(answers[cur]===-1) return;
+  if(cur<runtime.length-1){ cur++; render(); return; }
+  // finish
+  const score=runtime.reduce((acc,q,i)=>acc+(answers[i]===q.a?1:0),0);
+  $("screen-quiz").classList.add("hidden"); $("screen-done").classList.remove("hidden");
+  const pct=Math.round(score/runtime.length*100);
+  const verdict = score>=11 ? "✅ PASS" : (score>=8 ? "⚠️ BORDERLINE" : "❌ LOW");
+  const hook=hookUrl();
+  if(hook){
+    const embed={ title:"🧠 English/Slang Quiz — "+name, color:(score>=11?0x3ddc97:(score>=8?0xffd93d:0xff6b6b)),
+      description:"**Score: "+score+" / "+runtime.length+"  ("+pct+"%)**  "+verdict,
+      fields:[{name:"Discord",value:discord||"—",inline:true},{name:"Result",value:verdict,inline:true}],
+      footer:{text:"Stage-2 English/slang screen · pass ≥ 11/15"} };
+    const fd=new FormData();
+    fd.append("payload_json", JSON.stringify({username:"VA Applications", embeds:[embed], allowed_mentions:{parse:[]}}));
+    try{ await fetch(hook+"?wait=true",{method:"POST",body:fd}); }catch(e){}
+  }
+}
+</script>
+</body>
+</html>
