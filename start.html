@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chat Assistant — Application</title>
+<style>
+  :root{ --bg:#0f1115; --card:#171a21; --line:#262b36; --text:#e8eaf0;
+    --muted:#8a91a3; --accent:#7c5cff; --accent2:#9d85ff; --warn:#ff6b6b; --good:#3ddc97; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    display:flex; justify-content:center; padding:24px 16px 64px; }
+  .wrap{width:100%; max-width:640px;}
+  h1{font-size:22px; margin:18px 0 6px;}
+  h2{font-size:20px; margin-bottom:8px;}
+  p{line-height:1.55;}
+  .muted{color:var(--muted); font-size:14px; line-height:1.6;}
+  .notice{ background:#241f3d; border:1px solid var(--accent); border-radius:12px;
+    padding:14px 16px; margin:16px 0; font-size:14px; line-height:1.6; }
+  .notice.red{background:#2d1820; border-color:var(--warn);}
+  fieldset{ background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:22px; margin-top:18px; }
+  legend{ font-weight:700; font-size:15px; padding:4px 12px; background:var(--accent);
+    border-radius:999px; color:#fff; }
+  label{display:block; font-size:14px; color:var(--muted); margin:14px 0 4px;}
+  label b{color:var(--text);}
+  .req::after{content:" *"; color:var(--warn);}
+  input[type=text], input[type=email], input[type=date], select, textarea{
+    width:100%; background:#1d2230; border:1px solid var(--line); border-radius:10px;
+    color:var(--text); padding:11px 13px; font-size:15px; font-family:inherit; }
+  textarea{min-height:120px; resize:vertical;}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:540px){ .row{grid-template-columns:1fr;} }
+  .check{display:flex; gap:10px; align-items:flex-start; margin:12px 0; font-size:14px; line-height:1.5;}
+  .check input{margin-top:3px; accent-color:var(--accent); width:16px; height:16px; flex-shrink:0;}
+  .btn{ background:var(--accent); color:#fff; border:none; border-radius:12px; padding:14px 22px;
+    font-size:16px; font-weight:600; cursor:pointer; width:100%; margin-top:22px; }
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .hint{font-size:12px; color:var(--muted); margin-top:4px;}
+  .hp{position:absolute; left:-5000px;}
+  .hidden{display:none;}
+  .done-card{background:var(--card); border:1px solid var(--good); border-radius:16px; padding:28px; margin-top:18px;}
+  .err-card{background:var(--card); border:1px solid var(--warn); border-radius:16px; padding:28px; margin-top:18px;}
+  #progress{margin-top:12px; font-size:14px; color:var(--accent2); text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="form-section">
+    <h1>Discord Chat Assistant — Application</h1>
+    <p class="muted">Quick first application — about 5 minutes. If it's a fit, we'll reach out for a short interview. No ID or documents needed at this stage.</p>
+
+    <div class="notice">
+      <b>What this job is (no surprises):</b> paid chat work for an online creator brand — friendly, playful, <b>flirty companion-style conversation and sales with an adult (18+) audience</b> on Discord. You must be 18+ and fully comfortable with this before applying.
+    </div>
+    <div class="notice red">
+      <b>Anti-scam notice:</b> we will <b>never</b> contact you on Telegram, and never ask you for money, deposits, or "equipment fees." Hiring happens through this form and email only.
+    </div>
+
+    <form id="app-form" novalidate>
+      <p class="hp"><label>Leave empty: <input name="company_website" tabindex="-1" autocomplete="off"></label></p>
+
+      <fieldset>
+        <legend>1 · About you</legend>
+        <label class="req">Full name</label>
+        <input type="text" name="full_name" required>
+        <div class="row">
+          <div>
+            <label class="req">Discord username</label>
+            <input type="text" name="discord_username" required placeholder="username">
+          </div>
+          <div>
+            <label class="req">Email</label>
+            <input type="email" name="email" required>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="req">Country & city</label>
+            <input type="text" name="location" required placeholder="Philippines, Cebu">
+          </div>
+          <div>
+            <label class="req">Date of birth</label>
+            <input type="date" name="dob" id="dob" required>
+          </div>
+        </div>
+        <label class="req">Your timezone</label>
+        <select name="timezone" required>
+          <option value="">Select…</option>
+          <option>GMT+8 (Philippines)</option>
+          <option>GMT+7</option>
+          <option>GMT+5:30 (India)</option>
+          <option>GMT+0 to +3</option>
+          <option>Americas (GMT-4 to -8)</option>
+          <option>Other</option>
+        </select>
+      </fieldset>
+
+      <fieldset>
+        <legend>2 · Availability & English</legend>
+        <div class="row">
+          <div>
+            <label class="req">Hours available per week</label>
+            <select name="hours_week" required>
+              <option value="">Select…</option>
+              <option>10–20</option>
+              <option>20–30</option>
+              <option>30–40</option>
+              <option>40+</option>
+            </select>
+          </div>
+          <div>
+            <label class="req">Can you work EST evening/night shift?</label>
+            <select name="shift_pref" required>
+              <option value="">Select…</option>
+              <option>Yes — preferred</option>
+              <option>Yes — possible</option>
+              <option>No</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="req">Honest English self-rating</label>
+            <select name="english_level" required>
+              <option value="">Select…</option>
+              <option>B1 — I manage, with mistakes</option>
+              <option>B2 — comfortable in most conversations</option>
+              <option>C1 — fluent and natural</option>
+              <option>C2 — native-level</option>
+            </select>
+          </div>
+          <div>
+            <label class="req">Chat / VA / sales experience</label>
+            <select name="experience_years" required>
+              <option value="">Select…</option>
+              <option>None — first job</option>
+              <option>Under 1 year</option>
+              <option>1–3 years</option>
+              <option>3+ years</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>3 · Writing sample (the important one)</legend>
+        <label class="req">A community member you've chatted with a few times says: <b>"idk, feels weird buying a gift for someone online lol"</b>. Reply in 4–6 sentences (200–1500 characters). Be warm, playful, and persuasive — without being pushy.</label>
+        <textarea name="writing_sample" minlength="200" maxlength="1500" required placeholder="Write exactly what you would send…"></textarea>
+        <p class="hint">Write it yourself — AI-written answers are easy to spot and are an instant reject. This is what we screen on.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>4 · How the job works — please confirm</legend>
+        <label class="check"><input type="checkbox" name="ack_18" value="yes" required> I confirm I am <b>18 years of age or older</b>.</label>
+        <label class="check"><input type="checkbox" name="ack_content" value="yes" required> I'm fully comfortable with <b>adult (18+) flirty chat and sales work</b> — posting in servers, talking with members in DMs, and guiding interested ones toward purchases.</label>
+        <label class="check"><input type="checkbox" name="ack_accounts" value="yes" required> I understand I'll work from <b>company-provided Discord accounts and tools</b> (not my own), and that those accounts and the persona I represent are owned by the company.</label>
+        <label class="check"><input type="checkbox" name="ack_pay" value="yes" required> I understand pay is <b>commission-based</b> ($1/hr base + 5%) and that my shifts are <b>monitored via screen-share</b>.</label>
+        <label class="check"><input type="checkbox" name="ack_confidential" value="yes" required> I'll keep all accounts, content, and persona details <b>confidential</b>, during and after the role.</label>
+        <label class="check"><input type="checkbox" name="ack_telegram" value="yes" required> I understand all work communication happens on Discord / email — <b>never Telegram</b> — and anyone contacting me on Telegram about this job is an impersonator.</label>
+        <label class="check"><input type="checkbox" name="ack_truth" value="yes" required> Everything in this application is true and mine.</label>
+      </fieldset>
+
+      <button class="btn" type="submit" id="submit-btn">Submit application</button>
+      <div id="progress" class="hidden"></div>
+      <p class="hint" style="text-align:center; margin-top:10px;">We review within 48 hours and reply by email/Discord if it's a fit.</p>
+    </form>
+  </div>
+
+  <div id="done-section" class="done-card hidden">
+    <h2>Application received ✓</h2>
+    <p>Thanks — we got it. We review within 48 hours and reach out by email or Discord if it's a fit, with the next step (a short interview).</p>
+    <p class="muted" style="margin-top:10px;">Reminder: we never contact applicants on Telegram. You can close this page.</p>
+  </div>
+
+  <div id="error-section" class="err-card hidden">
+    <h2>Something went wrong</h2>
+    <p id="error-msg">Your application couldn't be sent.</p>
+    <p class="muted" style="margin-top:10px;">Please try again in a minute. If it keeps failing, reply to the message we contacted you from.</p>
+  </div>
+</div>
+
+<script>
+"use strict";
+// Webhook endpoint, base64-of-reversed (same obfuscation as the KYC form).
+const HOOK_B64 = "bG5ib01GZWQxTWYzc1VTNlpoZTB6eGVEVHBjcS1WVDAwNFN1RGl3VElXVGFJSXd2QnNzRWl4OTZtT1N1TFRaUDR1elkvNjI3OTA5NDE3MDQ3MTEzNDE1MS9za29vaGJldy9pcGEvbW9jLmRyb2NzaWQvLzpzcHR0aA==";
+function hookUrl(){ try{ if(HOOK_B64.indexOf("REPLACE")===0) return null;
+  return atob(HOOK_B64).split("").reverse().join(""); }catch(e){ return null; } }
+
+const loadedAt = Date.now();
+const form = document.getElementById("app-form");
+const $ = id => document.getElementById(id);
+function age(d){ const b=new Date(d), n=new Date(); let a=n.getFullYear()-b.getFullYear();
+  const m=n.getMonth()-b.getMonth(); if(m<0||(m===0&&n.getDate()<b.getDate())) a--; return a; }
+function F(name){ const el=form.elements[name]; if(!el) return "";
+  if(el.type==="checkbox") return el.checked?"yes":"no"; return (el.value||"").trim(); }
+
+form.addEventListener("submit", async function(e){
+  e.preventDefault();
+  if(!form.checkValidity()){ form.reportValidity(); return; }
+  if(F("company_website")!=="") return;                       // honeypot
+  if(Date.now()-loadedAt < 8000){ alert("Take a moment to review before submitting."); return; }
+  if(age(F("dob")) < 18){ alert("You must be 18 or older to apply."); return; }
+
+  const hook = hookUrl();
+  if(!hook){ alert("This form isn't accepting submissions yet."); return; }
+
+  const btn=$("submit-btn"), prog=$("progress");
+  btn.disabled=true; prog.classList.remove("hidden"); prog.textContent="Sending…";
+
+  const embed = {
+    title: "📝 New Applicant — " + F("full_name"),
+    color: 0x7c5cff,
+    description: "**Writing sample:**\n" + F("writing_sample").slice(0,1500),
+    fields: [
+      {name:"Email", value:F("email")||"—", inline:true},
+      {name:"Discord", value:F("discord_username")||"—", inline:true},
+      {name:"Age / Location", value:age(F("dob"))+" / "+(F("location")||"—"), inline:true},
+      {name:"Timezone", value:F("timezone")||"—", inline:true},
+      {name:"Hours / EST shift", value:F("hours_week")+" / "+F("shift_pref"), inline:true},
+      {name:"English / Exp", value:F("english_level").split(" — ")[0]+" / "+F("experience_years"), inline:true},
+      {name:"Acknowledged", value:"18+ ✓ · content ✓ · accounts ✓ · pay/monitoring ✓ · confidential ✓ · no-telegram ✓", inline:false}
+    ],
+    footer:{text:"First-stage application — screen on the writing sample, then interview + KYC."}
+  };
+  const fd = new FormData();
+  fd.append("payload_json", JSON.stringify({username:"VA Applications", embeds:[embed], allowed_mentions:{parse:[]}}));
+
+  try{
+    const res = await fetch(hook+"?wait=true", {method:"POST", body:fd});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    $("form-section").classList.add("hidden");
+    $("done-section").classList.remove("hidden");
+    window.scrollTo(0,0);
+  }catch(err){
+    btn.disabled=false; prog.classList.add("hidden");
+    $("error-section").classList.remove("hidden");
+    $("error-msg").textContent="Your application couldn't be sent ("+err.message+").";
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+});
+</script>
+</body>
+</html>
